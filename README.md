@@ -2,7 +2,7 @@
 
 ## Collaborators
 
- * Alex Bevilacqua
+ * Alex Bevilaqua
  * Aline Gemelli
  * Bruno Cesca
  * Mateus Calza
