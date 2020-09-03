@@ -19,6 +19,7 @@ void addMenu(HWND hwnd);
 void addElements(HWND hwnd);
 void start();
 void newGame();
+void  load();
 void action(int fieldIndex);
 
 int player = 1;
@@ -26,11 +27,17 @@ int player1ScoreValue = 0;
 int player2ScoreValue = 0;
 int fields[TOTAL_FIELDS];
 
+HINSTANCE instance;
 HWND player1Name;
 HWND player2Name;
 HWND player1Score;
 HWND player2Score;
 HWND fieldsWindows[TOTAL_FIELDS];
+
+HBITMAP mineUnknownBitmap;
+HBITMAP mineBombBitmap;
+HBITMAP mineEmptyBitmap;
+HBITMAP backgroundBitmap;
 
 LRESULT CALLBACK WindowProcedure(HWND hwnd,
     UINT uMsg,
@@ -41,6 +48,7 @@ int WINAPI
 WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int nCmdShow)
 // Window Class
 {
+	instance = hInst;
     srand((unsigned)time(0));
     WNDCLASS wc = {};
     wc.lpszClassName = "Campo Minado";
@@ -49,10 +57,12 @@ WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int nCmdShow)
     wc.hInstance = hInst;
     RegisterClass(&wc);
 
+ load();
+
     CreateWindow(wc.lpszClassName, "Campo Minado",
         WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, 500, 535, NULL, NULL,
         NULL, NULL);
-
+		   
     MSG msg = {};
 
     while (GetMessage(&msg, NULL, NULL, NULL)) {
@@ -98,6 +108,54 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd,
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
+void load() {
+    mineUnknownBitmap = (HBITMAP)LoadImage(NULL, 
+                                    "assets\\mine_unknown.bmp", 
+                                    IMAGE_BITMAP,
+                                    0, 
+                                    0,
+                                    LR_LOADFROMFILE);
+
+    mineEmptyBitmap = (HBITMAP)LoadImage(NULL, 
+                                    "assets\\mine_empty.bmp", 
+                                    IMAGE_BITMAP,
+                                    0, 
+                                    0,
+                                    LR_LOADFROMFILE);
+
+    mineBombBitmap = (HBITMAP)LoadImage(NULL, 
+                                    "assets\\mine_bomb.bmp", 
+                                    IMAGE_BITMAP,
+                                    0, 
+                                    0,
+                                    LR_LOADFROMFILE);
+
+    backgroundBitmap = (HBITMAP)LoadImage(NULL, 
+                                    "assets\\background.bmp", 
+                                    IMAGE_BITMAP,
+                                    0, 
+                                    0,
+                                    LR_LOADFROMFILE);
+	    DWORD dw = GetLastError(); 
+    if (dw) {
+    	 LPVOID lpMsgBuf;
+	    LPVOID lpDisplayBuf;
+	    
+    FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+        FORMAT_MESSAGE_FROM_SYSTEM |
+        FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL,
+        dw,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPTSTR) &lpMsgBuf,
+        0, NULL );
+
+    	MessageBox(NULL, (LPCTSTR)lpMsgBuf, "Error", MB_OK); 
+	}
+	
+}
+
 void addMenu(HWND hwnd)
 {
     HMENU hMenu = CreateMenu();
@@ -109,17 +167,24 @@ void addMenu(HWND hwnd)
 }
 
 void addElements(HWND hwnd)
-{
-    player1Name = CreateWindow("Static", "Jogador 1", WS_VISIBLE | WS_CHILD, 10, 10, 400, 20,
+{	
+
+HWND hStatic = CreateWindow("Static", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP,
+0, 0, 500, 535, hwnd, NULL, instance, NULL);
+SendMessage(hStatic, STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)backgroundBitmap);
+
+		    
+
+    player1Name = CreateWindow("Static", "Jogador 1", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, 10, 100, 20,
         hwnd, NULL, NULL, NULL);
 
-    player1Score = CreateWindow("Static", "0", WS_VISIBLE | WS_CHILD, 30, 40, 20, 20,
+    player1Score = CreateWindow("Static", "0", WS_VISIBLE | WS_CHILD | SS_CENTER, 30, 40, 20, 20,
         hwnd, NULL, NULL, NULL);
 
-    player2Name = CreateWindow("Static", "Jogador 2", WS_VISIBLE | WS_CHILD, 410, 10, 400, 20,
+    player2Name = CreateWindow("Static", "Jogador 2", WS_VISIBLE | WS_CHILD | SS_RIGHT, 360, 10, 100, 20,
         hwnd, NULL, NULL, NULL);
 
-    player2Score = CreateWindow("Static", "0", WS_VISIBLE | WS_CHILD, 435, 40, 20, 20,
+    player2Score = CreateWindow("Static", "0", WS_VISIBLE | WS_CHILD | SS_CENTER, 435, 40, 20, 20,
         hwnd, NULL, NULL, NULL);
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -132,9 +197,11 @@ void addElements(HWND hwnd)
     int index = 0;
     for (int row = 0; row < HEIGHT; row++) {
         for (int column = 0; column < WIDTH; column++) {
-            fieldsWindows[index] = CreateWindow("Button", "", WS_VISIBLE | WS_CHILD, column * 100 + 10, row * 100 + 100, 65, 65, hwnd,
+            fieldsWindows[index] = CreateWindow("Button", "", WS_CHILD | WS_VISIBLE | BS_BITMAP, column * 100 + 10, row * 100 + 100, 65, 65, hwnd,
                 (HMENU)index, NULL, NULL);
             EnableWindow(fieldsWindows[index], false);
+		    SendMessage(fieldsWindows[index], BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)mineUnknownBitmap);
+    
             index++;
         }
     }
@@ -149,16 +216,16 @@ void newGame() {
 
 void start()
 {
-	
-    char player2ScoreValueChars [3];
-    sprintf(player2ScoreValueChars, "%d", player2ScoreValue);
-    LPCSTR player2ScoreValueString = player2ScoreValueChars;
-    SetWindowTextA(player2Score, player2ScoreValueString);
     
     char player1ScoreValueChars [3];
     sprintf(player1ScoreValueChars, "%d", player1ScoreValue);
     LPCSTR player1ScoreValueString = player1ScoreValueChars;
     SetWindowTextA(player1Score, player1ScoreValueString);
+	
+    char player2ScoreValueChars [3];
+    sprintf(player2ScoreValueChars, "%d", player2ScoreValue);
+    LPCSTR player2ScoreValueString = player2ScoreValueChars;
+    SetWindowTextA(player2Score, player2ScoreValueString);
 	
     if (player == 2) {
         ShowWindow(player1Name, false);
@@ -215,7 +282,7 @@ void action(int index)
         for (int current = 0; current < TOTAL_FIELDS; current++) {
             if (fields[current] == HAS_MINE) {
                 fields[current] = HAS_MINE_VISIBLE;
-                SetWindowTextA(fieldsWindows[current], "*");
+                SetWindowText(fieldsWindows[current], "*");
             }
             EnableWindow(fieldsWindows[current], false);
         }
