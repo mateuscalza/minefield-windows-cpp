@@ -11,17 +11,20 @@
 #define HAS_NOTHING_VISIBLE 2
 #define HAS_MINE_VISIBLE 3
 
-HWND hEdit;
-
 void addMenu(HWND hwnd);
 void addElements(HWND hwnd);
 void start(HWND hwnd);
 void action(int fieldIndex);
 
 int player = 1;
-int player1Score = 0;
-int player2Score = 0;
+int player1ScoreValue = 0;
+int player2ScoreValue = 0;
 int fields[TOTAL_FIELDS];
+
+HWND player1Name;
+HWND player2Name;
+HWND player1Score;
+HWND player2Score;
 HWND fieldsWindows[TOTAL_FIELDS];
 
 LRESULT CALLBACK WindowProcedure(HWND hwnd,
@@ -103,16 +106,16 @@ void addMenu(HWND hwnd) {
 
 
 void addElements(HWND hwnd) {
-  CreateWindow("Static", "Jogador 1", WS_VISIBLE | WS_CHILD, 10, 10, 400, 20,
+  player1Name = CreateWindow("Static", "Jogador 1", WS_VISIBLE | WS_CHILD, 10, 10, 400, 20,
                hwnd, NULL, NULL, NULL);
 
-  hEdit = CreateWindow("Static", "0", WS_VISIBLE | WS_CHILD, 30, 40, 20, 20,
+  player1Score = CreateWindow("Static", "0", WS_VISIBLE | WS_CHILD, 30, 40, 20, 20,
                        hwnd, NULL, NULL, NULL);
 
-  CreateWindow("Static", "Jogador 2", WS_VISIBLE | WS_CHILD, 410, 10, 400, 20,
+  player2Name = CreateWindow("Static", "Jogador 2", WS_VISIBLE | WS_CHILD, 410, 10, 400, 20,
                hwnd, NULL, NULL, NULL);
 
-  hEdit = CreateWindow("Static", "0", WS_VISIBLE | WS_CHILD, 435, 40, 20, 20,
+  player2Score = CreateWindow("Static", "0", WS_VISIBLE | WS_CHILD, 435, 40, 20, 20,
                        hwnd, NULL, NULL, NULL);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -144,6 +147,15 @@ void start(HWND hwnd) {
 
 void action(int index) {
 	EnableWindow(fieldsWindows[index], false);
+	if (player == 1) {
+		player = 2;
+		ShowWindow(player1Name, false);
+		ShowWindow(player2Name, true);
+	} else {
+		player = 1;
+		ShowWindow(player1Name, true);
+		ShowWindow(player2Name, false);
+	}
 }
 
 
