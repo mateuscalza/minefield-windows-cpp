@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctime>
+#include <string>
 
 #define MENU_GAME_NEW 20
 #define MENU_GAME_EXIT 21
@@ -145,7 +146,14 @@ void addElements(HWND hwnd)
 
 void start()
 {
-    player = 1;
+    if (player == 2) {
+        ShowWindow(player1Name, false);
+        ShowWindow(player2Name, true);
+    }
+    else {
+        ShowWindow(player1Name, true);
+        ShowWindow(player2Name, false);
+    }
 
     int mine1 = rand() % TOTAL_FIELDS;
 
@@ -190,6 +198,23 @@ void stop()
 void action(int index)
 {
     if (fields[index] == HAS_MINE) {
+	    if (player == 1) {
+	        player = 2;
+	        player2ScoreValue++;
+	        char player2ScoreValueChars [3];
+	        sprintf(player2ScoreValueChars, "%d", player2ScoreValue);
+	        LPCSTR player2ScoreValueString = player2ScoreValueChars;
+	        SetWindowTextA(player2Score, player2ScoreValueString);
+	    }
+	    else {
+	        player = 1;
+	        player1ScoreValue++;
+	        char player1ScoreValueChars [3];
+	        sprintf(player1ScoreValueChars, "%d", player1ScoreValue);
+	        LPCSTR player1ScoreValueString = player1ScoreValueChars;
+	        SetWindowTextA(player1Score, player1ScoreValueString);
+	    }
+    	
         for (int current = 0; current < TOTAL_FIELDS; current++) {
             if (fields[current] == HAS_MINE) {
                 fields[current] = HAS_MINE_VISIBLE;
