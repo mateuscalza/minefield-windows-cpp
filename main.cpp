@@ -18,7 +18,7 @@
 void addMenu(HWND hwnd);
 void addElements(HWND hwnd);
 void start();
-void stop();
+void newGame();
 void action(int fieldIndex);
 
 int player = 1;
@@ -30,7 +30,6 @@ HWND player1Name;
 HWND player2Name;
 HWND player1Score;
 HWND player2Score;
-HWND newGame;
 HWND fieldsWindows[TOTAL_FIELDS];
 
 LRESULT CALLBACK WindowProcedure(HWND hwnd,
@@ -73,13 +72,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd,
     case WM_CREATE:
         addMenu(hwnd);
         addElements(hwnd);
-        stop();
         break;
 
     case WM_COMMAND:
         switch (wParam) {
         case MENU_GAME_NEW:
-            start();
+            newGame();
             break;
 
         case MENU_GAME_EXIT:
@@ -88,8 +86,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd,
 
         default:
             action(wParam);
-            // char editText[100];
-            // MessageBox(NULL, "Button", "X", MB_OK);
             break;
         }
         break;
@@ -128,7 +124,7 @@ void addElements(HWND hwnd)
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    newGame = CreateWindow("Button", "Novo Jogo", WS_VISIBLE | WS_CHILD, 190, 30, 100, 35,
+    CreateWindow("Button", "Novo Jogo", WS_VISIBLE | WS_CHILD, 190, 30, 100, 35,
         hwnd, (HMENU)MENU_GAME_NEW, NULL, NULL);
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -138,13 +134,32 @@ void addElements(HWND hwnd)
         for (int column = 0; column < WIDTH; column++) {
             fieldsWindows[index] = CreateWindow("Button", "", WS_VISIBLE | WS_CHILD, column * 100 + 10, row * 100 + 100, 65, 65, hwnd,
                 (HMENU)index, NULL, NULL);
+            EnableWindow(fieldsWindows[index], false);
             index++;
         }
     }
 }
 
+void newGame() {
+	player = 1;
+	player1ScoreValue = 0;
+	player2ScoreValue = 0;
+	start();
+}
+
 void start()
 {
+	
+    char player2ScoreValueChars [3];
+    sprintf(player2ScoreValueChars, "%d", player2ScoreValue);
+    LPCSTR player2ScoreValueString = player2ScoreValueChars;
+    SetWindowTextA(player2Score, player2ScoreValueString);
+    
+    char player1ScoreValueChars [3];
+    sprintf(player1ScoreValueChars, "%d", player1ScoreValue);
+    LPCSTR player1ScoreValueString = player1ScoreValueChars;
+    SetWindowTextA(player1Score, player1ScoreValueString);
+	
     if (player == 2) {
         ShowWindow(player1Name, false);
         ShowWindow(player2Name, true);
@@ -183,18 +198,6 @@ void start()
 	    SetWindowTextA(fieldsWindows[index], "");
         EnableWindow(fieldsWindows[index], true);
     }
-    ShowWindow(newGame, false);
-}
-
-void stop()
-{
-    ShowWindow(newGame, true);
-    ShowWindow(player1Name, true);
-    ShowWindow(player2Name, true);
-
-    for (int index = 0; index < TOTAL_FIELDS; index++) {
-        EnableWindow(fieldsWindows[index], false);
-    }
 }
 
 void action(int index)
@@ -203,18 +206,10 @@ void action(int index)
 	    if (player == 1) {
 	        player = 2;
 	        player2ScoreValue++;
-	        char player2ScoreValueChars [3];
-	        sprintf(player2ScoreValueChars, "%d", player2ScoreValue);
-	        LPCSTR player2ScoreValueString = player2ScoreValueChars;
-	        SetWindowTextA(player2Score, player2ScoreValueString);
 	    }
 	    else {
 	        player = 1;
 	        player1ScoreValue++;
-	        char player1ScoreValueChars [3];
-	        sprintf(player1ScoreValueChars, "%d", player1ScoreValue);
-	        LPCSTR player1ScoreValueString = player1ScoreValueChars;
-	        SetWindowTextA(player1Score, player1ScoreValueString);
 	    }
     	
         for (int current = 0; current < TOTAL_FIELDS; current++) {
@@ -222,9 +217,12 @@ void action(int index)
                 fields[current] = HAS_MINE_VISIBLE;
                 SetWindowTextA(fieldsWindows[current], "*");
             }
+            EnableWindow(fieldsWindows[current], false);
         }
+        
+        Sleep(3000);
 
-        stop();
+        start();
         return;
     }
 
