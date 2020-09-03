@@ -4,11 +4,25 @@
 #define MENU_GAME_EXIT 51
 #define WIDTH 5
 #define HEIGHT 4
+#define TOTAL_FIELDS 20
+
+#define HAS_NOTHING 0
+#define HAS_MINE 1
+#define HAS_NOTHING_VISIBLE 2
+#define HAS_MINE_VISIBLE 3
 
 HWND hEdit;
 
 void addMenu(HWND hwnd);
 void addElements(HWND hwnd);
+void start(HWND hwnd);
+
+int player = 1;
+int player1Score = 0;
+int player2Score = 0;
+int fields[TOTAL_FIELDS];
+HWND fieldsWindows[TOTAL_FIELDS];
+
 LRESULT CALLBACK WindowProcedure(HWND hwnd,
                                  UINT uMsg,
                                  WPARAM wParam,
@@ -52,6 +66,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd,
     case WM_COMMAND:
       switch (wParam) {
         case MENU_GAME_NEW:
+      	  start(hwnd);
           break;
 
         case MENU_GAME_EXIT:
@@ -59,8 +74,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd,
           break;
 
         default:
-            char editText[100];
-         	MessageBox(NULL, "Button", "X", MB_OK);
+            // char editText[100];
+         	// MessageBox(NULL, "Button", "X", MB_OK);
 	    	break;
       }
       break;
@@ -84,6 +99,7 @@ void addMenu(HWND hwnd) {
   SetMenu(hwnd, hMenu);
 }
 
+
 void addElements(HWND hwnd) {
   CreateWindow("Static", "Jogador 1", WS_VISIBLE | WS_CHILD, 10, 10, 400, 20,
                hwnd, NULL, NULL, NULL);
@@ -104,17 +120,24 @@ void addElements(HWND hwnd) {
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
   int index = 0;
   for(int row = 0; row < HEIGHT; row++) {
 	  for(int column = 0; column < WIDTH; column++) {
-	  	CreateWindow("Button", "", WS_VISIBLE | WS_CHILD, column * 100 + 10, row * 100 + 100, 65, 65, hwnd,
+	  	fieldsWindows[index] = CreateWindow("Button", "", WS_VISIBLE | WS_CHILD, column * 100 + 10, row * 100 + 100, 65, 65, hwnd,
                (HMENU)index, NULL, NULL);
+        EnableWindow(fieldsWindows[index], false);
 	  	index++;
 	  }
   }
-
-  HWND hStaticImage =
-      CreateWindow("Static", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 10, 90,
-                   400, 20, hwnd, NULL, NULL, NULL);
 }
+
+void start(HWND hwnd) {
+	player = 1;
+	for(int index = 0; index < TOTAL_FIELDS; index++) {
+	  fields[index] = HAS_NOTHING;
+      EnableWindow(fieldsWindows[index], true);
+	}
+}
+
 
