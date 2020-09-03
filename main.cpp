@@ -30,6 +30,7 @@ HWND player1Name;
 HWND player2Name;
 HWND player1Score;
 HWND player2Score;
+HWND newGame;
 HWND fieldsWindows[TOTAL_FIELDS];
 
 LRESULT CALLBACK WindowProcedure(HWND hwnd,
@@ -105,10 +106,8 @@ void addMenu(HWND hwnd)
 {
     HMENU hMenu = CreateMenu();
     HMENU hGameMenu = CreateMenu();
-    AppendMenuA(hGameMenu, MF_STRING, MENU_GAME_NEW, "Novo jogo");
-    AppendMenuA(hGameMenu, MF_SEPARATOR, NULL, NULL);
     AppendMenuA(hGameMenu, MF_STRING, MENU_GAME_EXIT, "Sair");
-    AppendMenuA(hMenu, MF_POPUP, (UINT_PTR)hGameMenu, "Opções");
+    AppendMenuA(hMenu, MF_POPUP, (UINT_PTR)hGameMenu, "Menu");
 
     SetMenu(hwnd, hMenu);
 }
@@ -129,7 +128,7 @@ void addElements(HWND hwnd)
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    CreateWindow("Button", "Novo Jogo", WS_VISIBLE | WS_CHILD, 190, 30, 100, 35,
+    newGame = CreateWindow("Button", "Novo Jogo", WS_VISIBLE | WS_CHILD, 190, 30, 100, 35,
         hwnd, (HMENU)MENU_GAME_NEW, NULL, NULL);
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -181,12 +180,15 @@ void start()
             fields[index] = HAS_NOTHING;
         }
 
+	    SetWindowTextA(fieldsWindows[index], "");
         EnableWindow(fieldsWindows[index], true);
     }
+    ShowWindow(newGame, false);
 }
 
 void stop()
 {
+    ShowWindow(newGame, true);
     ShowWindow(player1Name, true);
     ShowWindow(player2Name, true);
 
@@ -218,6 +220,7 @@ void action(int index)
         for (int current = 0; current < TOTAL_FIELDS; current++) {
             if (fields[current] == HAS_MINE) {
                 fields[current] = HAS_MINE_VISIBLE;
+                SetWindowTextA(fieldsWindows[current], "*");
             }
         }
 
@@ -225,7 +228,9 @@ void action(int index)
         return;
     }
 
+    fields[index] = HAS_NOTHING_VISIBLE;
     EnableWindow(fieldsWindows[index], false);
+
     if (player == 1) {
         player = 2;
         ShowWindow(player1Name, false);
