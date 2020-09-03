@@ -1,7 +1,7 @@
 #include <windows.h>
 
-#define MENU_GAME_NEW 50
-#define MENU_GAME_EXIT 51
+#define MENU_GAME_NEW 20
+#define MENU_GAME_EXIT 21
 #define WIDTH 5
 #define HEIGHT 4
 #define TOTAL_FIELDS 20
@@ -16,6 +16,7 @@ HWND hEdit;
 void addMenu(HWND hwnd);
 void addElements(HWND hwnd);
 void start(HWND hwnd);
+void action(int fieldIndex);
 
 int player = 1;
 int player1Score = 0;
@@ -74,6 +75,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd,
           break;
 
         default:
+        	action(wParam);
             // char editText[100];
          	// MessageBox(NULL, "Button", "X", MB_OK);
 	    	break;
@@ -138,6 +140,10 @@ void start(HWND hwnd) {
 	  fields[index] = HAS_NOTHING;
       EnableWindow(fieldsWindows[index], true);
 	}
+}
+
+void action(int index) {
+	EnableWindow(fieldsWindows[index], false);
 }
 
 
