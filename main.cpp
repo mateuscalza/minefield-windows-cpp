@@ -199,8 +199,8 @@ SendMessage(hStatic, STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)backgroundBitma
         for (int column = 0; column < WIDTH; column++) {
             fieldsWindows[index] = CreateWindow("Button", "", WS_CHILD | WS_VISIBLE | BS_BITMAP, column * 100 + 10, row * 100 + 100, 65, 65, hwnd,
                 (HMENU)index, NULL, NULL);
-            EnableWindow(fieldsWindows[index], false);
 		    SendMessage(fieldsWindows[index], BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)mineUnknownBitmap);
+            EnableWindow(fieldsWindows[index], false);
     
             index++;
         }
@@ -264,6 +264,7 @@ void start()
 
 	    SetWindowTextA(fieldsWindows[index], "");
         EnableWindow(fieldsWindows[index], true);
+		SendMessage(fieldsWindows[index], BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)mineUnknownBitmap);
     }
 }
 
@@ -280,11 +281,13 @@ void action(int index)
 	    }
     	
         for (int current = 0; current < TOTAL_FIELDS; current++) {
+            EnableWindow(fieldsWindows[current], false);
             if (fields[current] == HAS_MINE) {
+			    SendMessage(fieldsWindows[current], BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)mineBombBitmap);
+	            EnableWindow(fieldsWindows[current], true);
                 fields[current] = HAS_MINE_VISIBLE;
                 SetWindowText(fieldsWindows[current], "*");
             }
-            EnableWindow(fieldsWindows[current], false);
         }
         
         Sleep(3000);
