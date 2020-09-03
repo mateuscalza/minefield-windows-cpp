@@ -1,4 +1,7 @@
 #include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctime>
 
 #define MENU_GAME_NEW 20
 #define MENU_GAME_EXIT 21
@@ -13,7 +16,8 @@
 
 void addMenu(HWND hwnd);
 void addElements(HWND hwnd);
-void start(HWND hwnd);
+void start();
+void stop();
 void action(int fieldIndex);
 
 int player = 1;
@@ -28,134 +32,184 @@ HWND player2Score;
 HWND fieldsWindows[TOTAL_FIELDS];
 
 LRESULT CALLBACK WindowProcedure(HWND hwnd,
-                                 UINT uMsg,
-                                 WPARAM wParam,
-                                 LPARAM lParam);
+    UINT uMsg,
+    WPARAM wParam,
+    LPARAM lParam);
 
 int WINAPI
 WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int nCmdShow)
 // Window Class
 {
-  WNDCLASS wc = {};
-  wc.lpszClassName = "Campo Minado";
-  wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
-  wc.lpfnWndProc = WindowProcedure;
-  wc.hInstance = hInst;
-  RegisterClass(&wc);
+    srand((unsigned)time(0));
+    WNDCLASS wc = {};
+    wc.lpszClassName = "Campo Minado";
+    wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
+    wc.lpfnWndProc = WindowProcedure;
+    wc.hInstance = hInst;
+    RegisterClass(&wc);
 
-  CreateWindow(wc.lpszClassName, "Campo Minado",
-               WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, 500, 535, NULL, NULL,
-               NULL, NULL);
+    CreateWindow(wc.lpszClassName, "Campo Minado",
+        WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, 500, 535, NULL, NULL,
+        NULL, NULL);
 
-  MSG msg = {};
+    MSG msg = {};
 
-  while (GetMessage(&msg, NULL, NULL, NULL)) {
-    TranslateMessage(&msg);
-    DispatchMessage(&msg);
-  }
+    while (GetMessage(&msg, NULL, NULL, NULL)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
 
-  return 0;
+    return 0;
 }
 
 LRESULT CALLBACK WindowProcedure(HWND hwnd,
-                                 UINT msg,
-                                 WPARAM wParam,
-                                 LPARAM lParam) {
-  switch (msg) {
+    UINT msg,
+    WPARAM wParam,
+    LPARAM lParam)
+{
+    switch (msg) {
     case WM_CREATE:
-      addMenu(hwnd);
-      addElements(hwnd);
-      break;
+        addMenu(hwnd);
+        addElements(hwnd);
+        stop();
+        break;
 
     case WM_COMMAND:
-      switch (wParam) {
+        switch (wParam) {
         case MENU_GAME_NEW:
-      	  start(hwnd);
-          break;
+            start();
+            break;
 
         case MENU_GAME_EXIT:
-          DestroyWindow(hwnd);
-          break;
+            DestroyWindow(hwnd);
+            break;
 
         default:
-        	action(wParam);
+            action(wParam);
             // char editText[100];
-         	// MessageBox(NULL, "Button", "X", MB_OK);
-	    	break;
-      }
-      break;
+            // MessageBox(NULL, "Button", "X", MB_OK);
+            break;
+        }
+        break;
 
     case WM_DESTROY:
-      PostQuitMessage(0);
-      return 0;
-  }
+        PostQuitMessage(0);
+        return 0;
+    }
 
-  return DefWindowProc(hwnd, msg, wParam, lParam);
+    return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-void addMenu(HWND hwnd) {
-  HMENU hMenu = CreateMenu();
-  HMENU hGameMenu = CreateMenu();
-  AppendMenuA(hGameMenu, MF_STRING, MENU_GAME_NEW, "Novo jogo");
-  AppendMenuA(hGameMenu, MF_SEPARATOR, NULL, NULL);
-  AppendMenuA(hGameMenu, MF_STRING, MENU_GAME_EXIT, "Sair");
-  AppendMenuA(hMenu, MF_POPUP, (UINT_PTR)hGameMenu, "Opções");
+void addMenu(HWND hwnd)
+{
+    HMENU hMenu = CreateMenu();
+    HMENU hGameMenu = CreateMenu();
+    AppendMenuA(hGameMenu, MF_STRING, MENU_GAME_NEW, "Novo jogo");
+    AppendMenuA(hGameMenu, MF_SEPARATOR, NULL, NULL);
+    AppendMenuA(hGameMenu, MF_STRING, MENU_GAME_EXIT, "Sair");
+    AppendMenuA(hMenu, MF_POPUP, (UINT_PTR)hGameMenu, "Opções");
 
-  SetMenu(hwnd, hMenu);
+    SetMenu(hwnd, hMenu);
 }
 
+void addElements(HWND hwnd)
+{
+    player1Name = CreateWindow("Static", "Jogador 1", WS_VISIBLE | WS_CHILD, 10, 10, 400, 20,
+        hwnd, NULL, NULL, NULL);
 
-void addElements(HWND hwnd) {
-  player1Name = CreateWindow("Static", "Jogador 1", WS_VISIBLE | WS_CHILD, 10, 10, 400, 20,
-               hwnd, NULL, NULL, NULL);
+    player1Score = CreateWindow("Static", "0", WS_VISIBLE | WS_CHILD, 30, 40, 20, 20,
+        hwnd, NULL, NULL, NULL);
 
-  player1Score = CreateWindow("Static", "0", WS_VISIBLE | WS_CHILD, 30, 40, 20, 20,
-                       hwnd, NULL, NULL, NULL);
+    player2Name = CreateWindow("Static", "Jogador 2", WS_VISIBLE | WS_CHILD, 410, 10, 400, 20,
+        hwnd, NULL, NULL, NULL);
 
-  player2Name = CreateWindow("Static", "Jogador 2", WS_VISIBLE | WS_CHILD, 410, 10, 400, 20,
-               hwnd, NULL, NULL, NULL);
+    player2Score = CreateWindow("Static", "0", WS_VISIBLE | WS_CHILD, 435, 40, 20, 20,
+        hwnd, NULL, NULL, NULL);
 
-  player2Score = CreateWindow("Static", "0", WS_VISIBLE | WS_CHILD, 435, 40, 20, 20,
-                       hwnd, NULL, NULL, NULL);
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    CreateWindow("Button", "Novo Jogo", WS_VISIBLE | WS_CHILD, 190, 30, 100, 35,
+        hwnd, (HMENU)MENU_GAME_NEW, NULL, NULL);
 
-  CreateWindow("Button", "Novo Jogo", WS_VISIBLE | WS_CHILD, 190, 30, 100, 35,
-               hwnd, (HMENU)MENU_GAME_NEW, NULL, NULL);
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    int index = 0;
+    for (int row = 0; row < HEIGHT; row++) {
+        for (int column = 0; column < WIDTH; column++) {
+            fieldsWindows[index] = CreateWindow("Button", "", WS_VISIBLE | WS_CHILD, column * 100 + 10, row * 100 + 100, 65, 65, hwnd,
+                (HMENU)index, NULL, NULL);
+            index++;
+        }
+    }
+}
 
+void start()
+{
+    player = 1;
 
-  int index = 0;
-  for(int row = 0; row < HEIGHT; row++) {
-	  for(int column = 0; column < WIDTH; column++) {
-	  	fieldsWindows[index] = CreateWindow("Button", "", WS_VISIBLE | WS_CHILD, column * 100 + 10, row * 100 + 100, 65, 65, hwnd,
-               (HMENU)index, NULL, NULL);
+    int mine1 = rand() % TOTAL_FIELDS;
+
+    int mine2;
+    do {
+        mine2 = rand() % TOTAL_FIELDS;
+    } while (mine2 == mine1);
+
+    int mine3;
+    do {
+        mine3 = rand() % TOTAL_FIELDS;
+    } while (mine3 == mine1 || mine3 == mine2);
+
+    for (int index = 0; index < TOTAL_FIELDS; index++) {
+        if (index == mine1) {
+            fields[index] = HAS_MINE;
+        }
+        else if (index == mine2) {
+            fields[index] = HAS_MINE;
+        }
+        else if (index == mine3) {
+            fields[index] = HAS_MINE;
+        }
+        else {
+            fields[index] = HAS_NOTHING;
+        }
+
+        EnableWindow(fieldsWindows[index], true);
+    }
+}
+
+void stop()
+{
+    ShowWindow(player1Name, true);
+    ShowWindow(player2Name, true);
+
+    for (int index = 0; index < TOTAL_FIELDS; index++) {
         EnableWindow(fieldsWindows[index], false);
-	  	index++;
-	  }
-  }
+    }
 }
 
-void start(HWND hwnd) {
-	player = 1;
-	for(int index = 0; index < TOTAL_FIELDS; index++) {
-	  fields[index] = HAS_NOTHING;
-      EnableWindow(fieldsWindows[index], true);
-	}
-}
+void action(int index)
+{
+    if (fields[index] == HAS_MINE) {
+        for (int current = 0; current < TOTAL_FIELDS; current++) {
+            if (fields[current] == HAS_MINE) {
+                fields[current] = HAS_MINE_VISIBLE;
+            }
+        }
 
-void action(int index) {
-	EnableWindow(fieldsWindows[index], false);
-	if (player == 1) {
-		player = 2;
-		ShowWindow(player1Name, false);
-		ShowWindow(player2Name, true);
-	} else {
-		player = 1;
-		ShowWindow(player1Name, true);
-		ShowWindow(player2Name, false);
-	}
-}
+        stop();
+        return;
+    }
 
+    EnableWindow(fieldsWindows[index], false);
+    if (player == 1) {
+        player = 2;
+        ShowWindow(player1Name, false);
+        ShowWindow(player2Name, true);
+    }
+    else {
+        player = 1;
+        ShowWindow(player1Name, true);
+        ShowWindow(player2Name, false);
+    }
+}
 
